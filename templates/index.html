@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard Harga Bawang Merah</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { padding: 20px; }
+    .card { margin-bottom: 20px; }
+    .alert-danger { font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <h2>🧄 Dashboard Komoditas Bawang Merah</h2>
+
+  <div class="row text-center">
+    <div class="col-md-3"><div class="card p-3 bg-light">Avg. Harga<br><h4>Rp {{ avg_price }}</h4></div></div>
+    <div class="col-md-3"><div class="card p-3 bg-light">Harga Tertinggi<br><h4>Rp {{ max_price }}</h4></div></div>
+    <div class="col-md-3"><div class="card p-3 bg-light">Jumlah Wilayah<br><h4>{{ volume }}</h4></div></div>
+    <div class="col-md-3"><div class="card p-3 bg-light">Anomali Hari Ini<br><h4 class="text-danger">{{ anomaly_count }}</h4></div></div>
+  </div>
+
+  <div class="card p-4">
+    <h5>📈 Grafik Harga Rata-rata Harian (Nasional)</h5>
+    <canvas id="priceChart" height="100"></canvas>
+  </div>
+
+  <div class="card p-3">
+    <h5>🚨 Anomali Terdeteksi (Harga > 50.000)</h5>
+    {% for row in anomalies %}
+      <div class="alert alert-danger">
+        {{ row['Provinsi'] }} - Rp{{ row['Harga'] }} ({{ row['Date'] }})
+      </div>
+    {% endfor %}
+  </div>
+
+  <script>
+    const ctx = document.getElementById('priceChart').getContext('2d');
+    const chartData = JSON.parse('{{ chart_data | tojson | safe }}');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: chartData.labels,
+        datasets: [{
+          label: 'Harga Rata-rata Nasional',
+          data: chartData.data,
+          borderColor: 'red',
+          backgroundColor: 'rgba(255,0,0,0.1)',
+          fill: true,
+          tension: 0.3
+        }]
+      }
+    });
+  </script>
+</body>
+</html>
